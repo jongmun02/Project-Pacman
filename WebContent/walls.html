@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+
+<link rel="stylesheet" type="text/css" href="walls.css">
+
+<script type="text/javascript">
+	window.onload = function() {
+		var map = [
+			[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
+			[ 1, 6, 2, 2, 2, 2, 1, 2, 2, 2, 2, 8, 1 ],
+			[ 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1 ],
+			[ 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1 ],
+			[ 1, 4, 2, 2, 1, 2, 5, 2, 1, 2, 2, 4, 1 ],
+			[ 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1 ],
+			[ 1, 2, 1, 1, 2, 2, 1, 2, 2, 1, 1, 2, 1 ],
+			[ 1, 7, 2, 2, 2, 2, 1, 2, 2, 2, 2, 9, 1 ],
+			[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
+		]
+		var pacman = {
+			x : 4,
+			y : 6
+		}
+		var enemy = { //좌측 상단 적
+			x : 1,
+			y : 1
+		}
+		var enemy2 = { //좌측 하단 적
+			x : 7,
+			y : 1
+		}
+		var enemy3 = { //우측 상단 적
+			x : 1,
+			y : 11
+		}
+		var enemy4 = { //우측 하단 적
+			x : 7,
+			y : 11
+		}
+		var score = 0;
+		var scoreplus = 0;
+		var second = 30;
+		var rotate = 0; //팩맨 회전 변수
+		var loc = 2; //적 지나갈 때 맵 형태 유지시켜주는 변수
+		var loc2 = 2;
+		var loc3 = 2;
+		var loc4 = 2;
+		var life = 3;
+		var ghostWeak = true;
+		var cnt;
+
+		function drawWorld() { //맵 찍는 함수
+			document.getElementById("world").innerHTML = "";
+			for (var x = 0; x < map.length; x = x + 1) {
+				for (var y = 0; y < map[x].length; y = y + 1) {
+					if (map[x][y] === 1) {
+						document.getElementById('world').innerHTML += "<div class='wall'></div>";
+					} else if (map[x][y] === 2) {
+						document.getElementById('world').innerHTML += "<div class='bob'></div>";
+					} else if (map[x][y] === 3) {
+						document.getElementById('world').innerHTML += "<div class='ground'></div>";
+					} else if (map[x][y] === 4) {
+						document.getElementById('world').innerHTML += "<div class='item'></div>";
+					} else if (map[x][y] === 5) {
+						if (rotate == 39) {
+							document.getElementById('world').innerHTML += "<div class='pacman'></div>";
+						} else if (rotate == 40) {
+							document.getElementById('world').innerHTML += "<div class='pacmanDown'></div>";
+						} else if (rotate == 37) {
+							document.getElementById('world').innerHTML += "<div class='pacmanLeft'></div>";
+						} else if (rotate == 38) {
+							document.getElementById('world').innerHTML += "<div class='pacmanUp'></div>";
+						} else {
+							document.getElementById('world').innerHTML += "<div class='pacman'></div>";
+						}
+					} else if (map[x][y] === 6) {
+						if (ghostWeak === true) //아이템 먹었을 시 고스트 이미지 변경
+							document.getElementById('world').innerHTML += "<div class='enemyRed'></div>";
+						else if (ghostWeak === false)
+							document.getElementById('world').innerHTML += "<div class='weakEnemy'></div>";
+					} else if (map[x][y] === 7) {
+						if (ghostWeak === true) //아이템 먹었을 시 고스트 이미지 변경
+							document.getElementById('world').innerHTML += "<div class='enemyPink'></div>";
+						else if (ghostWeak === false)
+							document.getElementById('world').innerHTML += "<div class='weakEnemy'></div>";
+					} else if (map[x][y] === 8) {
+						if (ghostWeak === true) //아이템 먹었을 시 고스트 이미지 변경
+							document.getElementById('world').innerHTML += "<div class='enemyBlue'></div>";
+						else if (ghostWeak === false)
+							document.getElementById('world').innerHTML += "<div class='weakEnemy'></div>";
+					} else if (map[x][y] === 9) {
+						if (ghostWeak === true) //아이템 먹었을 시 고스트 이미지 변경
+							document.getElementById('world').innerHTML += "<div class='enemyYellow'></div>";
+						else if (ghostWeak === false)
+							document.getElementById('world').innerHTML += "<div class='weakEnemy'></div>";
+					}
+				}
+				document.getElementById('world').innerHTML += "<br>";
+			} $('#score').html(score);
+			$('#scoreplus').html("+" + scoreplus);
+		} 
+
+		ghost = setInterval(function() { //적 움직이는 함수
+			var ranX = Math.round((Math.random() * 2) - 1); //적 이동방향 좌표(x축)
+			var ranY = Math.round((Math.random() * 2) - 1); //적 이동방향 좌표(y축)
+
+			if (map[enemy.x + ranX][enemy.y] != 1) { //좌측 상단 적 움직이는 조건문
+				map[enemy.x][enemy.y] = loc; //이동하기 직전 적이 위치한 좌표
+				enemy.x = enemy.x + ranX; //좌표 이동
+				if (map[enemy.x][enemy.y] == 2) { //이동할 위치가 bob인지 확인
+					loc = 2;
+					map[enemy.x][enemy.y] = 6; //이동할 위치로 적 위치를 변경
+				} else if (map[enemy.x][enemy.y] == 3) { //이동할 위치가 ground인지 확인
+					loc = 3;
+					map[enemy.x][enemy.y] = 6;
+				} else if (map[enemy.x][enemy.y] == 4) { //이동할 위치가 item인지 확인
+					loc = 4;
+					map[enemy.x][enemy.y] = 6;
+				} else if (map[enemy.x][enemy.y] == 5) { //이동할 위치가 pacman인지 확인
+					loc = 3;
+					checkCrash(6); //충돌 시 pacman 잡는 함수
+					map[enemy.x][enemy.y] = 6;
+				} else if (map[enemy.x][enemy.y] == 7 || map[enemy.x][enemy.y] == 8 || map[enemy.x][enemy.y] == 9) { //이동할 위치가 다른 enemy인지 확인
+					enemy.x = enemy.x + ranX * -1; //맞으면 반대 방향으로 이동
+					map[enemy.x][enemy.y] = 6;
+				}
+				drawWorld();
+			} else if (map[enemy.x][enemy.y + ranY] != 1) {
+				map[enemy.x][enemy.y] = loc;
+				enemy.y = enemy.y + ranY;
+				if (map[enemy.x][enemy.y] == 2) {
+					loc = 2;
+					map[enemy.x][enemy.y] = 6;
+				} else if (map[enemy.x][enemy.y] == 3) {
+					loc = 3;
+					map[enemy.x][enemy.y] = 6;
+				} else if (map[enemy.x][enemy.y] == 4) {
+					loc = 4;
+					map[enemy.x][enemy.y] = 6;
+				} else if (map[enemy.x][enemy.y] == 5) {
+					loc = 3;
+					checkCrash(6);
+					map[enemy.x][enemy.y] = 6;
+				} else if (map[enemy.x][enemy.y] == 7 || map[enemy.x][enemy.y] == 8 || map[enemy.x][enemy.y] == 9) {
+					enemy.y = enemy.y + ranY * -1;
+					map[enemy.x][enemy.y] = 6;
+				}
+				drawWorld();
+			} //좌측 상단 적 움직이는 조건문 끝
+
+			if (map[enemy2.x + ranY][enemy2.y] != 1) { //좌측 하단 적 움직이는 조건문
+				map[enemy2.x][enemy2.y] = loc2;
+				enemy2.x = enemy2.x + ranY;
+				if (map[enemy2.x][enemy2.y] == 2) {
+					loc2 = 2;
+					map[enemy2.x][enemy2.y] = 7;
+				} else if (map[enemy2.x][enemy2.y] == 3) {
+					loc2 = 3;
+					map[enemy2.x][enemy2.y] = 7;
+				} else if (map[enemy2.x][enemy2.y] == 4) {
+					loc2 = 4;
+					map[enemy2.x][enemy2.y] = 7;
+				} else if (map[enemy2.x][enemy2.y] == 5) {
+					loc2 = 3;
+					checkCrash(7);
+					map[enemy2.x][enemy2.y] = 7;
+				} else if (map[enemy2.x][enemy2.y] == 6 || map[enemy2.x][enemy2.y] == 8 || map[enemy2.x][enemy2.y] == 9) {
+					enemy2.x = enemy2.x + ranY * -1;
+					map[enemy2.x][enemy2.y] = 7;
+				}
+				drawWorld();
+			} else if (map[enemy2.x][enemy2.y + ranX] != 1) {
+				map[enemy2.x][enemy2.y] = loc2;
+				enemy2.y = enemy2.y + ranX;
+				if (map[enemy2.x][enemy2.y] == 2) {
+					loc2 = 2;
+					map[enemy2.x][enemy2.y] = 7;
+				} else if (map[enemy2.x][enemy2.y] == 3) {
+					loc2 = 3;
+					map[enemy2.x][enemy2.y] = 7;
+				} else if (map[enemy2.x][enemy2.y] == 4) {
+					loc2 = 4;
+					map[enemy2.x][enemy2.y] = 7;
+				} else if (map[enemy2.x][enemy2.y] == 5) {
+					loc2 = 3;
+					checkCrash(7);
+					map[enemy2.x][enemy2.y] = 7;
+				} else if (map[enemy2.x][enemy2.y] == 6 || map[enemy2.x][enemy2.y] == 8 || map[enemy2.x][enemy2.y] == 9) {
+					enemy2.y = enemy2.y + ranX * -1;
+					map[enemy2.x][enemy2.y] = 7;
+				}
+				drawWorld();
+			} //좌측 하단 적 움직이는 조건문 끝
+
+			if (map[enemy3.x + ranX][enemy3.y] != 1) { //우측 상단 적 움직이는 조건문
+				map[enemy3.x][enemy3.y] = loc3;
+				enemy3.x = enemy3.x + ranX;
+				if (map[enemy3.x][enemy3.y] == 2) {
+					loc3 = 2;
+					map[enemy3.x][enemy3.y] = 8;
+				} else if (map[enemy3.x][enemy3.y] == 3) {
+					loc3 = 3;
+					map[enemy3.x][enemy3.y] = 8;
+				} else if (map[enemy3.x][enemy3.y] == 4) {
+					loc3 = 4;
+					map[enemy3.x][enemy3.y] = 8;
+				} else if (map[enemy3.x][enemy3.y] == 5) {
+					loc3 = 3;
+					checkCrash(8);
+					map[enemy3.x][enemy3.y] = 8;
+				} else if (map[enemy3.x][enemy3.y] == 6 || map[enemy3.x][enemy3.y] == 7 || map[enemy3.x][enemy3.y] == 9) {
+					enemy3.x = enemy3.x + ranX * -1;
+					map[enemy3.x][enemy3.y] = 8;
+				}
+				drawWorld();
+			} else if (map[enemy3.x][enemy3.y + ranY] != 1) {
+				map[enemy3.x][enemy3.y] = loc3;
+				enemy3.y = enemy3.y + ranY;
+				if (map[enemy3.x][enemy3.y] == 2) {
+					loc3 = 2;
+					map[enemy3.x][enemy3.y] = 8;
+				} else if (map[enemy3.x][enemy3.y] == 3) {
+					loc3 = 3;
+					map[enemy3.x][enemy3.y] = 8;
+				} else if (map[enemy3.x][enemy3.y] == 4) {
+					loc3 = 4;
+					map[enemy3.x][enemy3.y] = 8;
+				} else if (map[enemy3.x][enemy3.y] == 5) {
+					loc3 = 3;
+					checkCrash(8);
+					map[enemy3.x][enemy3.y] = 8;
+				} else if (map[enemy3.x][enemy3.y] == 6 || map[enemy3.x][enemy3.y] == 7 || map[enemy3.x][enemy3.y] == 9) {
+					enemy3.y = enemy3.y + ranY * -1;
+					map[enemy3.x][enemy3.y] = 8;
+				}
+				drawWorld();
+			} //우측 상단 적 움직이는 조건문 끝
+
+			if (map[enemy4.x + ranY][enemy4.y] != 1) { //우측 하단 적 움직이는 조건문
+				map[enemy4.x][enemy4.y] = loc4;
+				enemy4.x = enemy4.x + ranY;
+				if (map[enemy4.x][enemy4.y] == 2) {
+					loc4 = 2;
+					map[enemy4.x][enemy4.y] = 9;
+				} else if (map[enemy4.x][enemy4.y] == 3) {
+					loc4 = 3;
+					map[enemy4.x][enemy4.y] = 9;
+				} else if (map[enemy4.x][enemy4.y] == 4) {
+					loc4 = 4;
+					map[enemy4.x][enemy4.y] = 9;
+				} else if (map[enemy4.x][enemy4.y] == 5) {
+					loc4 = 3;
+					checkCrash(9);
+					map[enemy4.x][enemy4.y] = 9;
+				} else if (map[enemy4.x][enemy4.y] == 6 || map[enemy4.x][enemy4.y] == 7 || map[enemy4.x][enemy4.y] == 8) {
+					enemy4.x = enemy4.x + ranY * -1;
+					map[enemy4.x][enemy4.y] = 9;
+				}
+				drawWorld();
+			} else if (map[enemy4.x][enemy4.y + ranX] != 1) {
+				map[enemy4.x][enemy4.y] = loc4;
+				enemy4.y = enemy4.y + ranX;
+				if (map[enemy4.x][enemy4.y] == 2) {
+					loc4 = 2;
+					map[enemy4.x][enemy4.y] = 9;
+				} else if (map[enemy4.x][enemy4.y] == 3) {
+					loc4 = 3;
+					map[enemy4.x][enemy4.y] = 9;
+				} else if (map[enemy4.x][enemy4.y] == 6 || map[enemy4.x][enemy4.y] == 7 || map[enemy4.x][enemy4.y] == 8) {
+					enemy4.y = enemy4.y + ranX * -1;
+					map[enemy4.x][enemy4.y] = 9;
+				} else if (map[enemy4.x][enemy4.y] == 5) {
+					loc4 = 3;
+					checkCrash(9);
+					map[enemy4.x][enemy4.y] = 9;
+				} else if (map[enemy4.x][enemy4.y] == 4) {
+					loc4 = 4;
+					map[enemy4.x][enemy4.y] = 9;
+				}
+				drawWorld();
+			} //우측 하단 적 움직이는 조건문 끝
+		}, 100);
+
+		document.onkeydown = function(e) { //팩맨 움직이는 함수
+			if (e.keyCode === 37) { //left
+				if (map[pacman.x][pacman.y - 1] !== 1) {
+					if (map[pacman.x][pacman.y - 1] === 2) { // 밥 만났을 때, 스코어 추가하기.
+						score = score + 10;
+						scoreplus = 10;
+					} else if (map[pacman.x][pacman.y - 1] === 6 || map[pacman.x][pacman.y - 1] === 7 ||
+						map[pacman.x][pacman.y - 1] === 8 || map[pacman.x][pacman.y - 1] === 9) { //왼쪽 한칸 앞에 고스트가 있다면
+						if (ghostWeak == true) {
+							checkCrash(37); //충돌 메소드 실행
+						} else {
+							revivalEnemy(map[pacman.x][pacman.y - 1]);
+							score = score + 100;
+							scoreplus = 100;
+						}
+					} else if (map[pacman.x][pacman.y - 1] === 4) { //왼쪽 한칸 앞에 아이템이 있다면
+						eatItem(); //eatItem() 함수 호출
+					}
+					map[pacman.x][pacman.y] = 3;
+					pacman.y = pacman.y - 1;
+					map[pacman.x][pacman.y] = 5;
+					drawWorld();
+					rotate = e.keyCode;
+				}
+			} else if (e.keyCode === 38) { //up
+				if (map[pacman.x - 1][pacman.y] !== 1) {
+					if (map[pacman.x - 1][pacman.y] === 2) { // 밥 만났을 때, 스코어 추가하기.
+						score = score + 10;
+						scoreplus = 10;
+					} else if (map[pacman.x - 1][pacman.y] === 6 || map[pacman.x - 1][pacman.y] === 7 ||
+						map[pacman.x - 1][pacman.y] === 8 || map[pacman.x - 1][pacman.y] === 9) { //한칸 위쪽에 고스트가 있다면
+						if (ghostWeak == true) {
+							checkCrash(38); //충돌 메소드 실행
+						} else {
+							revivalEnemy(map[pacman.x - 1][pacman.y]);
+							score = score + 100;
+							scoreplus = 100;
+						}
+					} else if (map[pacman.x - 1][pacman.y] === 4) { //한칸 위쪽에 아이템이 있다면
+						eatItem(); //eatItem() 함수 호출
+					}
+					map[pacman.x][pacman.y] = 3;
+					pacman.x = pacman.x - 1;
+					map[pacman.x][pacman.y] = 5;
+					drawWorld();
+					rotate = e.keyCode;
+				}
+			} else if (e.keyCode === 39) { //right
+				if (map[pacman.x][pacman.y + 1] !== 1) {
+					if (map[pacman.x][pacman.y + 1] === 2) { // 밥 만났을 때, 스코어 추가하기.
+						score = score + 10;
+						scoreplus = 10;
+					} else if (map[pacman.x][pacman.y + 1] === 6 || map[pacman.x][pacman.y + 1] === 7 ||
+						map[pacman.x][pacman.y + 1] === 8 || map[pacman.x][pacman.y + 1] === 9) { //오른쪽 한칸 앞에 고스트가 있다면
+						if (ghostWeak == true) {
+							checkCrash(39); //충돌 메소드 실행
+						} else {
+							revivalEnemy(map[pacman.x][pacman.y + 1]);
+							score = score + 100;
+							scoreplus = 100;
+						}
+					} else if (map[pacman.x][pacman.y + 1] === 4) { //오른쪽 한칸 앞에 아이템이 있다면
+						eatItem(); //eatItem() 함수 호출
+					}
+					map[pacman.x][pacman.y] = 3;
+					pacman.y = pacman.y + 1;
+					map[pacman.x][pacman.y] = 5;
+					drawWorld();
+					rotate = e.keyCode;
+				}
+			} else if (e.keyCode === 40) { //down
+				if (map[pacman.x + 1][pacman.y] !== 1) {
+					if (map[pacman.x + 1][pacman.y] === 2) { // 밥 만났을 때, 스코어 추가하기.
+						score = score + 10;
+						scoreplus = 10;
+					} else if (map[pacman.x + 1][pacman.y] === 6 || map[pacman.x + 1][pacman.y] === 7 ||
+						map[pacman.x + 1][pacman.y] === 8 || map[pacman.x + 1][pacman.y] === 9) { //아래쪽 한 칸 앞에 고스트가 있다면
+						if (ghostWeak == true) {
+							checkCrash(40); //충돌 메소드 실행
+						} else {
+							revivalEnemy(map[pacman.x + 1][pacman.y]);
+							score = score + 100;
+							scoreplus = 100;
+						}
+					} else if (map[pacman.x + 1][pacman.y] === 4) { //아래쪽 한 칸 앞에 아이템이 있다면
+						eatItem(); //eatItem() 함수 호출
+					}
+					map[pacman.x][pacman.y] = 3;
+					pacman.x = pacman.x + 1;
+					map[pacman.x][pacman.y] = 5;
+					drawWorld();
+					rotate = e.keyCode;
+				}
+			} else if (e.keyCode === 27) {
+				location.href = "Main.html";
+			}
+		}
+
+		function checkCrash(num) { //매개변수 : 이동키 번호(아스키 코드)
+			if (ghostWeak == true) { //아이템을 먹은 후 고스트가 파란색이라면		
+				if (life == 3) { //라이프가 하나씩 줄어듬
+					life--; //라이프 카운터를 하나씩 줄어들게 함
+					var life3 = document.getElementById('hearts3')
+					life3.style.display = 'none'; //라이프 이미지를 하나씩 없애줌
+					revival(); //부활을 위해 revival 함수 호출
+				} else if (life == 2) {
+					life--;
+					var life2 = document.getElementById('hearts2')
+					life2.style.display = 'none';
+					revival();
+				} else if (life == 1) { //라이프가 다 소진 될 시 윈도우 창 종료(추후 수정 필요)
+					location.href = "gameover.html";
+				}
+			} else {
+				if (num == 6) {
+					loc = 3;
+					enemy.x = 4;
+					enemy.y = 6;
+					map[enemy.x][enemy.y] = 6;
+					score = score + 100;
+					scoreplus = 100;
+				} else if (num == 7) {
+					loc2 = 3;
+					enemy2.x = 4;
+					enemy2.y = 6;
+					map[enemy2.x][enemy2.y] = 7;
+					score = score + 100;
+					scoreplus = 100;
+				} else if (num == 8) {
+					loc3 = 3;
+					enemy3.x = 4;
+					enemy3.y = 6;
+					map[enemy3.x][enemy3.y] = 8;
+					score = score + 100;
+					scoreplus = 100;
+				} else if (num == 9) {
+					loc4 = 3;
+					enemy4.x = 4;
+					enemy4.y = 6;
+					map[enemy4.x][enemy4.y] = 9;
+					score = score + 100;
+					scoreplus = 100;
+				}
+			}
+		}
+
+		function revival() { //팩맨이 죽었을 시 부활을 하기 위한 메소드
+			map[pacman.x][pacman.y] = 3; //한 칸 앞서서 확인 후 해당 자리에는 그라운드 타일을 깔아줌
+			pacman.x = 4; //팩맨 부활 위치(4,6)	  
+			pacman.y = 6;
+			map[pacman.x][pacman.y] = 5;
+		}
+
+		function revivalEnemy(num) { //적이 죽었을 시 부활을 하기 위한 메소드
+			if (num == 6) {
+				loc = 3;
+				enemy.x = 4;
+				enemy.y = 6;
+				map[enemy.x][enemy.y] = 6;
+			} else if (num == 7) {
+				loc2 = 3;
+				enemy2.x = 4;
+				enemy2.y = 6;
+				map[enemy2.x][enemy2.y] = 7;
+			} else if (num == 8) {
+				loc3 = 3;
+				enemy3.x = 4;
+				enemy3.y = 6;
+				map[enemy3.x][enemy3.y] = 8;
+			} else if (num == 9) {
+				loc4 = 3;
+				enemy4.x = 4;
+				enemy4.y = 6;
+				map[enemy4.x][enemy4.y] = 9;
+			}
+		}
+
+		function eatItem() { //아이템 먹은 후 수행되는 메소드(정확히는 먹기 전 타일에서 키 입력 시 발생)
+			ghostWeak = false; //고스트의 상태를 변화시키기 위해서 boolean을 false로 바꾸고
+			setTimeout(function() { //3초간 진행시키기 위해 setTimeout 함수 사용
+				ghostWeak = true;
+			}, 3000)
+		}
+
+		timer = setInterval(function() {
+			second--;
+			$('#time').html("Time : " + second);
+			if (second == 0) {
+				location.href = "gameover.html";
+			}
+			cnt = 0;
+			for (var x = 0; x < map.length; x = x + 1) {
+				for (var y = 0; y < map[x].length; y = y + 1) {
+					if (map[x][y] == 2) {
+						cnt++;
+					}
+				}
+			}
+			if (cnt == 0) {
+				location.href = "winner.html";
+			}
+		}, 1000);
+	}
+</script>
+<title>Insert title here</title>
+</head>
+<body>
+	<img src="image/hearts.png" id='hearts1'
+		style='width: 45px; height: 45px;'>
+	<img src="image/hearts.png" id='hearts2'
+		style='width: 45px; height: 45px;'>
+	<img src="image/hearts.png" id='hearts3'
+		style='width: 45px; height: 45px;'>&nbsp;&nbsp;&nbsp;
+	<b style="font-family: Arial; font-size: xx-large;">Score <span
+		id="score">0</span></b>&nbsp;
+	<span id="scoreplus"></span>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	<b style="font-family: Arial; font-size: xx-large;"><span id="time"></span></b>
+	<div id="world"></div><br>
+</body>
+</html>

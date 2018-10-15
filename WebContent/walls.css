@@ -1,0 +1,99 @@
+@charset "UTF-8";
+
+.pacman {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/pac.png");
+	display: inline-block;
+}
+
+.pacmanDown {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/pac.png");
+	display: inline-block;
+	transform: rotate(90deg);
+}
+
+.pacmanLeft {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/pac.png");
+	display: inline-block;
+	transform: rotateY(180deg);
+}
+
+.pacmanUp {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/pac.png");
+	display: inline-block;
+	transform: rotate(270deg);
+}
+
+.wall {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/map.png");
+	display: inline-block;
+}
+
+.bob {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/bob.jpg");
+	display: inline-block;
+}
+
+.ground {
+	width: 50px;
+	height: 50px;
+	display: inline-block;
+}
+
+.enemyRed {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/enemy1.png");
+	display: inline-block;
+}
+
+.enemyPink {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/enemy2.png");
+	display: inline-block;
+}
+
+.enemyBlue {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/enemy3.png");
+	display: inline-block;
+}
+
+.enemyYellow {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/enemy4.png");
+	display: inline-block;
+}
+
+.weakEnemy {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/weakEnemy.png");
+	display: inline-block;
+}
+
+.item {
+	width: 50px;
+	height: 50px;
+	background-image: url("image/item.jpg");
+	display: inline-block;
+}
+
+div {
+	margin: 0px;
+	vertical-align: top;
+}

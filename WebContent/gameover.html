@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Press+Start+2P&effect=fire-animation');
+</style>
+<script type="text/javascript">
+	window.onload = function() {
+
+		//  	캔버스 불러오기
+		var c = document.getElementById('demo');
+		var ctx = c.getContext("2d");
+
+		var alpha = 0,   /// current alpha value
+	    	delta = 0.01; /// delta = speed
+	   	var num = 1;
+		
+		function loop() {
+			if(num==1)
+	    		alpha += delta;
+			else if(num==2 && alpha<=0)
+				location.href = "Main.html";
+			else if(num==2)
+				alpha -= delta;
+			
+	    	    ctx.clearRect(0, 0, demo.width, demo.height);
+	    	    
+	    	    ctx.globalAlpha = alpha;
+	    	    ctx.fillStyle="black";
+	    	    ctx.fillRect(0, 0, demo.width, demo.height);
+	    	   
+	    	    ctx.font = '70px "Press Start 2P"';
+	    	    ctx.fillStyle = "white";
+	    	    ctx.fillText("Game Over", 75, 200);
+	    	    ctx.font = '25px "Press Start 2P"';
+				ctx.fillText("Do you wanna play again???", 60, 400);
+				ctx.fillText("If you press a ENTER,", 60, 450);
+				ctx.fillText("You can move the Menu!!!", 60, 500);
+				setTimeout(loop, 50)
+	    	}
+
+		loop();
+
+		document.onkeydown = function(e) {
+			if (e.keyCode == 13) {
+				num=2;
+				loop();
+			}
+		}
+
+	}
+</script>
+</head>
+<body>
+	<span class="font-effect-fire-animation" style="font-family: 'Press Start 2P', cursive;">&nbsp;</span>
+	<canvas id="demo" width="800" height="600" style="border: 1px solid"></canvas>
+</body>
+</html>

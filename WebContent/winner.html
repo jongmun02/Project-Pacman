@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
+<style>
+@import
+	url('https://fonts.googleapis.com/css?family=Press+Start+2P&effect=fire-animation')
+	;
+</style>
+<style type="text/css">
+.font-effect-fire-animation {
+	width: 800px;
+	height: 600px;
+	font-size: 50px;
+	font-family: 'Press Start 2P', cursive;
+	background-color: black;
+	vertical-align: middle;
+	text-align: center;
+	display: table-cell;
+}
+</style>
+<script type="text/javascript">
+	window.onload = function() {
+
+		$('.font-effect-fire-animation').hide();
+		function winnerGame() {
+		$('.font-effect-fire-animation').fadeIn('slow');
+		}
+
+		winnerGame();
+
+		document.onkeydown = function(e) {
+			if (e.keyCode == 13) {
+				location.href="Main.html";
+			}
+		}
+
+	}
+</script>
+</head>
+<body>
+	<div class="font-effect-fire-animation">Mission<br><br>	Complete!!!<br><br>
+	<b style="font-size:20px">Please Press the Enter!!!</b>
+	</div>
+</body>
+
+</html>

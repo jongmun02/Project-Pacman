@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Press+Start+2P&effect=fire-animation');
+</style>
+<script type="text/javascript">
+ window.onload = function() {
+//  	초기 위치 설정
+ 	var x = 30;
+ 	var y = 300;
+
+ 	var x2 = 80;
+ 	var y2 = 300;
+//  	초기 크기
+ 	var imgX = 50;
+ 	var imgY = 50;
+
+ 	var imgX2 = 50;
+ 	var imgY2 = 50;
+
+//  	최대 크기
+ 	var maxX = 800;
+ 	var maxY = 600;
+
+//  	그림 방향을 위한 변수
+ 	var dir = 1;
+
+//  	캔버스 불러오기
+ 	var c = document.getElementById('demo');
+ 	var ctx = c.getContext("2d");
+ 	var change = true;
+ 	var degrees = 0;
+
+//  	캔버스에 그리기
+ 	function draw() {
+//  		1. 캔버스 비우기
+ 		ctx.clearRect(0, 0, 800, 600);
+//  		이미지 함수 사용
+ 		var img = new Image();
+ 		var img2 = new Image();
+ 		var main = new Image();
+ 		var space = new Image();
+
+ 		space.src = "image/space.jpg"
+ 		ctx.drawImage(space, 0, 0);
+ 		main.src = "image/main1.png"
+ 		ctx.drawImage(main, 100, 30);
+ 		ctx.font = '25px "Press Start 2P"';
+ 		ctx.fillStyle = "white";
+ 		ctx.fillText("Press Enter key to start game", 40, 430);
+
+ 		if (change == true)
+ 			img.src = "image/pacman1.png";
+ 		else
+ 			img.src = "image/pacman2.png";
+
+ 		img2.src = "image/enemy1.png";
+
+
+ 		img.onload = function() {
+ 			if (change == true)
+ 				ctx.drawImage(img, x, y, imgX, imgY);
+ 			else if (change == false) {
+ 				ctx.save();
+ 				ctx.translate(x + imgX / 2, y + imgY / 2);
+ 				ctx.rotate(degrees * Math.PI / 180.0);
+ 				ctx.translate(-x - imgX / 2, -y - imgY / 2);
+ 				ctx.drawImage(img, x, y, imgX, imgY);
+ 				ctx.restore();
+ 			}
+ 		};
+
+ 		img2.onload = function() {
+ 			console.log("확인")
+ 			ctx.drawImage(img2, x2, y2, imgX2, imgY2);
+ 		};
+
+ 		if (change == true)
+ 			change = false;
+ 		else
+ 			change = true;
+
+ 		if (x >= maxX) {
+ 			dir = -1;
+ 			x = maxX;
+ 			y = 300;
+ 			x2 = maxX + 50;
+ 			y2 = 300;
+ 			imgX = 30;
+ 			imgY = 30;
+ 			imgX2 = 30;
+ 			imgY2 = 30;
+
+ 		} else if (x < 0) {
+ 			dir = 1;
+ 			x = -50;
+ 			y = 300;
+ 			x2 = 0;
+ 			y2 = 300;
+ 			imgX = 30;
+ 			imgY = 30;
+ 			imgX2 = 30;
+ 			imgY2 = 30;
+ 		} else {
+ 			if (dir == 1) {
+ 				x = x + (5 * dir);
+ 				y = y - (1 * dir);
+ 				x2 = x2 + (7 * dir);
+ 				imgX++;
+ 				imgY++;
+ 			} else if (dir == -1) {
+ 				x = x + (7 * dir);
+ 				x2 = x2 + (5 * dir);
+ 				y2 = y2 - (1 * dir);
+ 				imgX2++;
+ 				imgY2++;
+ 			}
+ 		}
+ 	}
+
+ 	var setInt = setInterval(function() {
+ 		draw();
+ 	}, 100)
+	
+ 	setTimeout(function() {
+ 		clearInterval(setInt); 			// 메인화면에서 팩맨 이동하는 함수 종료. (화면 벗어날 때)
+ 	}, 16000)
+	
+ 	document.onkeydown = function(e) {
+ 		if(e.keyCode == 13) {
+ 			ctx.clearRect(0, 0, demo.width, demo.height);
+ 			
+ 			var alpha = 1, delta = 0.01;
+ 			
+ 			function loop() {
+ 				
+ 				if(alpha<=0)
+ 					location.href = "walls.html";
+ 				
+ 				alpha -= delta;
+ 				ctx.globalAlpha = alpha;
+ 				ctx.fillStyle="black";
+	    	    ctx.fillRect(0, 0, demo.width, demo.height);
+ 				setTimeout(loop, 50);
+ 			}
+	
+ 			loop();
+		
+ 		} 
+ 	}
+ }
+</script>
+</head>
+<body>
+<canvas id="demo" width="800" height="600" style="border: 1px solid"></canvas>
+</body>
+</html>
